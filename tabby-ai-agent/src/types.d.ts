@@ -84,6 +84,11 @@ declare module 'tabby-terminal' {
     session: any
     input$: any
     output$: any
+    sessionChanged$: any
     write (data: string): Promise<void>
+  }
+
+  export class TerminalDecorator {
+    attach (terminal: BaseTerminalTabComponent<any>): void
   }
 }
