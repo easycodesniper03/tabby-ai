@@ -1,6 +1,8 @@
 import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core'
 import { AgentService, AgentMessage } from '../services/agent.service'
 
+import { assessRisk } from '../services/safety.service'
+
 @Component({
   selector: 'agent-panel',
   template: `
@@ -177,6 +179,13 @@ export class AgentPanelComponent implements OnInit, OnDestroy {
   }
 
   execute (command: string): void {
+    // Check if high risk — if so, show confirmation
+    const risk = assessRisk(command)
+    if (risk === 'high') {
+      if (!confirm(`⚠️ 高风险命令！\n\n${command}\n\n确定要执行吗？`)) {
+        return
+      }
+    }
     this.agent.executeCommand(command)
   }
 
