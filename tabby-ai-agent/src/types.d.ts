@@ -1,8 +1,13 @@
+// Type declarations for Tabby plugin APIs
+
 declare module 'tabby-core' {
-  export { Injectable, NgZone, Component, OnInit, OnDestroy, Input, ViewChild, ElementRef, NgModule } from '@angular/core'
+  export { Injectable, NgZone, Component, OnInit, OnDestroy, Input, ViewChild, ElementRef, NgModule, ComponentFactoryResolver, ApplicationRef, Injector, EnvironmentInjector, ComponentRef } from '@angular/core'
+  export { CommonModule } from '@angular/common'
+  export { FormsModule } from '@angular/forms'
 
   export class ConfigService {
     store: any
+    ready$: any
   }
 
   export class LogService {
@@ -27,7 +32,7 @@ declare module 'tabby-core' {
 
   export class HotkeysService {
     hotkey$: any
-    bind (hotkey: any, callback: () => void): void
+    bind (hotkey: string, callback: () => void): void
   }
 
   export class ConfigProvider {
@@ -39,6 +44,8 @@ declare module 'tabby-core' {
     title: string
     weight?: number
     click: () => void
+    submenu?: () => Promise<any[]>
+    touchBarTitle?: string
   }
 
   export class ToolbarButtonProvider {
@@ -52,19 +59,73 @@ declare module 'tabby-core' {
 
   export class HotkeyProvider {
     hotkeys: HotkeyDescription[]
+    async provide (): Promise<HotkeyDescription[]>
   }
 
-  export class BaseTabComponent {}
-
-  export class SubscriptionContainer {
-    cancelAll (): void
+  export class BaseTabComponent {
+    destroyed$: any
   }
 
   export class AppService {
     tabs: any[]
     activeTab: any
     activeTabChange$: any
+    tabOpened$: any
+    ready$: any
   }
+
+  export class SubscriptionContainer {
+    cancelAll (): void
+  }
+
+  // Re-export Angular modules for convenience
+  export class TabbyCoreModule {}
+}
+
+declare module 'tabby-terminal' {
+  import { BaseTabComponent } from 'tabby-core'
+
+  export class BaseTerminalTabComponent<P = any> extends BaseTabComponent {
+    session: any
+    input$: any
+    output$: any
+    sessionChanged$: any
+    zoom: number
+    write (data: string): Promise<void>
+    getSelectedText (): Promise<string>
+  }
+
+  export class TerminalDecorator {
+    attach (terminal: BaseTerminalTabComponent<any>): void
+    detach (terminal: BaseTerminalTabComponent<any>): void
+  }
+
+  export class SessionMiddleware {
+    feedFromSession (data: Buffer): void
+    feedFromTerminal (data: Buffer): void
+    close (): void
+    outputToSession$: any
+    outputToTerminal$: any
+  }
+
+  export class SessionMiddlewareStack extends SessionMiddleware {
+    push (middleware: SessionMiddleware): void
+    unshift (middleware: SessionMiddleware): void
+    remove (middleware: SessionMiddleware): void
+  }
+
+  export class BaseSession {
+    middleware: SessionMiddlewareStack
+    output$: any
+    closed$: any
+    destroyed$: any
+    feedFromTerminal (data: Buffer): void
+    getWorkingDirectory (): Promise<string>
+    reportedCWD?: string
+    open: boolean
+  }
+
+  export class TabbyTerminalModule {}
 }
 
 declare module 'tabby-settings' {
@@ -77,18 +138,6 @@ declare module 'tabby-settings' {
   }
 }
 
-declare module 'tabby-terminal' {
-  import { BaseTabComponent } from 'tabby-core'
-
-  export class BaseTerminalTabComponent<P = any> extends BaseTabComponent {
-    session: any
-    input$: any
-    output$: any
-    sessionChanged$: any
-    write (data: string): Promise<void>
-  }
-
-  export class TerminalDecorator {
-    attach (terminal: BaseTerminalTabComponent<any>): void
-  }
+declare module '@ng-bootstrap/ng-bootstrap' {
+  export class NgbModule {}
 }

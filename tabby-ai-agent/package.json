@@ -1,26 +1,22 @@
 {
   "name": "tabby-ai-agent",
-  "version": "0.1.0",
-  "description": "AI Agent for Tabby terminal - natural language to shell commands",
-  "keywords": [
-    "tabby-plugin"
-  ],
+  "version": "0.2.0",
+  "description": "AI Agent for Tabby - natural language to shell commands, optimized for Chinese users",
+  "keywords": ["tabby-plugin", "ai", "assistant", "terminal"],
   "main": "dist/index.js",
   "scripts": {
     "build": "webpack --config webpack.config.mjs"
   },
-  "dependencies": {
-    "openai": "^4.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@angular/core": "^15.0.0",
-    "ts-loader": "^9.0.0",
     "typescript": "^4.9.0",
+    "ts-loader": "^9.0.0",
     "webpack": "^5.0.0",
     "webpack-cli": "^5.0.0"
   },
   "peerDependencies": {
     "tabby-core": "*",
-    "tabby-terminal": "*"
+    "tabby-terminal": "*",
+    "tabby-settings": "*"
   }
 }
