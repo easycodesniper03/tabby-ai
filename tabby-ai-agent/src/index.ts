@@ -1,10 +1,10 @@
-import { NgModule, Injectable, ComponentFactoryResolver, ApplicationRef, Injector, EnvironmentInjector, ComponentRef } from '@angular/core'
+import { NgModule, Injectable } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 
 import { ConfigProvider, ConfigService, ToolbarButtonProvider, ToolbarButton, HotkeyProvider, HotkeyDescription, HotkeysService, LogService, AppService } from 'tabby-core'
 import TabbyCoreModule from 'tabby-core'
-import TabbyTerminalModule, { BaseTerminalTabComponent, TerminalDecorator, BaseSession } from 'tabby-terminal'
+import TabbyTerminalModule, { TerminalDecorator } from 'tabby-terminal'
 import { SettingsTabProvider } from 'tabby-settings'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 
@@ -12,9 +12,12 @@ import { AIService } from './services/ai.service'
 import { TerminalService } from './services/terminal.service'
 import { SidebarService } from './services/sidebar.service'
 import { SecurityService } from './services/security.service'
+import { InlinePreviewService } from './services/inline-preview.service'
+import { AITerminalDecorator } from './services/terminal-decorator.service'
 
 import { SidebarComponent } from './components/sidebar.component'
 import { SettingsComponent } from './components/settings.component'
+import { CommandPreviewComponent } from './components/command-preview.component'
 
 // ─── Tabby Integration Providers ─────────────────────
 
@@ -66,27 +69,6 @@ export class AISettingsProvider extends SettingsTabProvider {
   getComponentType (): any { return SettingsComponent }
 }
 
-// ─── Terminal Decorator ──────────────────────────────
-
-@Injectable()
-export class AITerminalDecorator extends TerminalDecorator {
-  private subscriptions: any[] = []
-
-  constructor (
-    private terminal: TerminalService,
-    private log: LogService,
-  ) { super() }
-
-  attach (terminal: BaseTerminalTabComponent<any>): void {
-    this.log.info('[AI Agent] Attached to terminal')
-    this.terminal.register(terminal)
-  }
-
-  detach (terminal: BaseTerminalTabComponent<any>): void {
-    this.terminal.unregister(terminal)
-  }
-}
-
 // ─── Module ──────────────────────────────────────────
 
 @NgModule({
@@ -112,13 +94,16 @@ export class AITerminalDecorator extends TerminalDecorator {
     TerminalService,
     SidebarService,
     SecurityService,
+    InlinePreviewService,
   ],
   declarations: [
     SidebarComponent,
     SettingsComponent,
+    CommandPreviewComponent,
   ],
   entryComponents: [
     SidebarComponent,
+    CommandPreviewComponent,
   ],
 })
 export default class AIAgentModule {
