@@ -2,7 +2,8 @@ import { Injectable, NgZone } from '@angular/core'
 import { LogService, ConfigService } from 'tabby-core'
 import { BaseTerminalTabComponent, TerminalDecorator } from 'tabby-terminal'
 import { TerminalService } from './terminal.service'
-import { InlinePreviewService } from './inline-preview.service'
+import { AIService } from './ai.service'
+import { SecurityService } from './security.service'
 import { NaturalLanguageMiddleware } from './natural-language.middleware'
 
 @Injectable()
@@ -11,7 +12,8 @@ export class AITerminalDecorator extends TerminalDecorator {
 
   constructor (
     private terminal: TerminalService,
-    private preview: InlinePreviewService,
+    private ai: AIService,
+    private security: SecurityService,
     private config: ConfigService,
     private log: LogService,
     private zone: NgZone,
@@ -22,7 +24,6 @@ export class AITerminalDecorator extends TerminalDecorator {
     this.installMiddleware(terminal)
     this.log.info('[AI Agent] Attached to terminal')
 
-    // Re-install middleware when session changes (reconnects)
     ;(terminal as any).sessionChanged$?.subscribe(() => {
       this.installMiddleware(terminal)
     })
@@ -43,25 +44,14 @@ export class AITerminalDecorator extends TerminalDecorator {
     if (!terminal.session?.middleware) return
 
     const id = this.getTerminalId(terminal)
-    // Remove old middleware if any
     const old = this.middlewares.get(id)
     if (old) {
       terminal.session.middleware.remove(old)
       old.close()
     }
 
-    const mw = new NaturalLanguageMiddleware()
-    // Check if AI Agent is enabled
-    const enabled = this.config.store.aiAgent?.enabled ?? true
-    mw.setEnabled(enabled)
-
-    // When natural language is detected → show inline preview
-    mw.naturalLanguage$.subscribe((text: string) => {
-      this.log.info(`[AI Agent] Natural language detected: ${text}`)
-      this.zone.run(() => {
-        this.preview.show(text)
-      })
-    })
+    const mw = new NaturalLanguageMiddleware(this.ai, this.terminal, this.security)
+    mw.setEnabled(this.config.store.aiAgent?.enabled ?? true)
 
     terminal.session.middleware.unshift(mw)
     this.middlewares.set(id, mw)
